@@ -1,4 +1,4 @@
-<h2>Go to <a href="http://www.beatpush.com">BeatPush.com</a> to see this code in action. Click the "Synth" tab at the top of the page.</h2>
+<h2>Go to <a href="http://www.beatpush.com" target="_blank">BeatPush.com</a> to see this code in action. Click the "Synth" tab at the top of the page.</h2>
 
 The cool animations on page selection are implemented without writing any javascript at all...Just bind the "selected" attribute of neon-animated-pages to the "selected" attribute of paper-tabs, and specify some animations eg. entry-animation="fade-in-animation" exit-animation="scale-down-animation"
 
