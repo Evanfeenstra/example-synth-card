@@ -14,7 +14,7 @@
 	    </paper-tabs>
 
 	    <!-- here, the selected tab is bound to the selected page. Also page animations are specified -->
-        <neon-animated-pages id="innerpages" selected="{{page_selected}}" entry-animation="fade-in-animation" exit-animation="scale-down-animation">
+            <neon-animated-pages id="innerpages" selected="{{page_selected}}" entry-animation="fade-in-animation" exit-animation="scale-down-animation">
 
         	<!-- "Note" page -->
 	        <neon-animatable class='flex'>
@@ -40,7 +40,7 @@
     		</neon-animatable>
 
     		<!-- "Mod" page -->
-   			<neon-animatable class='flex'>
+   		<neon-animatable class='flex'>
        			<div class="flex-6 vertical layout around-justified">
 					<div class="flex-8 vertical layout" id="xybounder">
        					<paper-button class="flex" on-up="getClickPosition" on-track="getClickPosition">
@@ -68,9 +68,9 @@
           			<paper-tab class="vtab" on-tap="play_note" name="6">6</paper-tab>
       			</paper-vert-tabs>
 
-   			</neon-animatable>
+   		</neon-animatable>
 
-   		</neon-animated-pages>
+   	    </neon-animated-pages>
 
 	</div>
 </template>
