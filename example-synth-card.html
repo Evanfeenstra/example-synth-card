@@ -1,0 +1,223 @@
+<!-- In this app, all Polymer elements are imported once at the beginning, so only Polymer is imported here.-->
+<!-- In a more modular app, elements would import only when needed -->
+<link rel="import" href="../bower_components/polymer/polymer.html">
+
+<dom-module id="synth-card">
+
+<template>
+	<!-- these flexbox classes are imported from iron-flex-layout.html -->
+	<div class="vertical layout center">
+	    <paper-tabs class="horizontal layout" id="innertabs" selected="{{page_selected}}">
+	        <paper-tab class="flex">Note</paper-tab>
+	        <paper-tab class="flex">FX</paper-tab>
+	        <paper-tab class="flex">Mod</paper-tab>
+	    </paper-tabs>
+
+	    <!-- here, the selected tab is bound to the selected page. Also page animations are specified -->
+        <neon-animated-pages id="innerpages" selected="{{page_selected}}" entry-animation="fade-in-animation" exit-animation="scale-down-animation">
+
+        	<!-- "Note" page -->
+	        <neon-animatable class='flex'>
+	          	<div class="flex vertical layout" touch-action="none">
+	          		<!--I included the code for just one square here-->
+	              	<paper-button class="flex" on-down="play_note" on-up="stop_note" on-track="handleTrack">tone</paper-button>
+	          	</div>
+	        </neon-animatable>
+        
+	        <!-- "FX" page -->
+        	<neon-animatable class='flex'>
+          		<div class="flex vertical layout around-justified">
+          			<div class="flex">
+         				<paper-slider pin immediate-value="{{reverb_setting}}"></paper-slider>
+         			</div>
+		          	<div class="flex">
+		         		<paper-slider pin immediate-value="{{filter_setting}}"></paper-slider>
+		         	</div>
+        			<div class="flex">
+            			<paper-slider immediate-value="{{scale_setting}}"></paper-slider>
+            		</div>
+       			</div>
+    		</neon-animatable>
+
+    		<!-- "Mod" page -->
+   			<neon-animatable class='flex'>
+       			<div class="flex-6 vertical layout around-justified">
+					<div class="flex-8 vertical layout" id="xybounder">
+       					<paper-button class="flex" on-up="getClickPosition" on-track="getClickPosition">
+       						<!-- the lfo style is easily managed here with an attribute binding -->
+        					<svg id="lfosvg" viewBox="0 0 300 100" preserveAspectRatio="none" style$="{{lfo_style}}">
+          						<polyline id="lfopolyline" points="0,100 25,0 50,100 75,0 100,100 125,0 150,100 175,0 200,100 225,0 250,100 275,0 300,100" fill="rgba(0,0,0,0)" stroke="#765373" stroke-width="3" stroke-linejoin="round"/>
+        					</svg>
+        					<div id="dot"></div>
+       					</paper-button>
+       				</div>
+
+       				<div class="flex-1 horizontal layout around-justified">
+          				<span>Speed: </span><b>{{x_val}}</b>
+       					<span>Amount: </span><b>{{y_val}}</b>
+       				</div>
+       			</div>
+       
+       			<!-- <paper-vert-tabs> is a modified version of paper-tabs, https://github.com/Evanfeenstra/paper-vert-tabs -->
+       			<paper-vert-tabs align-left id="tabsamples" class="flex-1 self-end" selected="{{mode_selected}}">
+          			<paper-tab class="vtab" on-tap="play_note" name="1">1</paper-tab>
+          			<paper-tab class="vtab" on-tap="play_note" name="2">2</paper-tab>
+          			<paper-tab class="vtab" on-tap="play_note" name="3">3</paper-tab>
+          			<paper-tab class="vtab" on-tap="play_note" name="4">4</paper-tab>
+          			<paper-tab class="vtab" on-tap="play_note" name="5">5</paper-tab>
+          			<paper-tab class="vtab" on-tap="play_note" name="6">6</paper-tab>
+      			</paper-vert-tabs>
+
+   			</neon-animatable>
+
+   		</neon-animated-pages>
+
+	</div>
+</template>
+
+<script>
+
+Polymer({
+
+  is: 'synth-card',
+
+  // declared properties are easily changed from anywhere in the app eg:
+  // document.getElementById('synth-card').page_selected = 2;
+  // They can be bound to properties of parent elements as well
+  properties: {
+  	page_selected: {
+  		type: Number,
+  		value: 0,
+  		observer: 'page_selectedChanged'
+  	},
+
+  	mode_selected: {
+  		type: Number,
+  		value: 0,
+  		observer: 'mode_selectedChanged'
+  	},
+
+  	//When I load a new filter setting (like from a MongoDB document), I just have to update <synth-card>.filter_setting, and both the UI and the actual musical parameters update as well.
+  	filter_setting: {
+  		type: Number,
+  		value: 45,
+  		observer: 'filter_settingChanged'
+  	}
+  },
+
+  //the xyheight and xywidth variables must be reset in case the screen was rotated or resized. This assures that getDotPosition is always scaled correctly.
+  page_selectedChanged: function() {
+  	if (this.page_selected==2) {
+      this.xyheight=this.$.xybounder.clientHeight;
+      this.xywidth=this.$.xybounder.clientWidth;
+    }
+  },
+
+  //updating the waveform which controls the mod
+  mode_selectedChanged: function() {
+  	this.$.lfopolyline.setAttribute("points",lfo_polyline_array[this.mode_selected]);
+  	var waveform=Math.floor(this.mode_selected/2);
+    onUpdateModWaveform( oscwaves[waveform] );
+  },
+
+  //some audio math to update filter cutoff
+  filter_settingChanged: function() {
+	var numberOfOctaves = Math.log( 22050 / 40 ) / Math.LN2;
+	var multiplier = Math.pow(2, numberOfOctaves * (this.filter_setting/100.0 - 1.0));
+    onUpdateFilterCutoff(this.filter_setting);
+  },
+
+  //this function handles the drag-and-drop avatar in the "note" page
+  handleTrack: function(e) {
+    switch(e.detail.state) {
+      case 'start':
+        var color = e.target.style.backgroundColor;
+        this.avatar.style.cssText = 'display:block;border: 3px solid ' + color + '; width: 15px; height: 15px; border-radius: 15px; background-color: whitesmoke; z-index: 9;';
+        break;
+      case 'track':
+          var x = e.detail.x, y = e.detail.y;
+          this.avatar.style.transform = 
+            this.avatar.style.webkitTransform = 
+              'translate(' + x + 'px, ' + y + 'px)';
+        break;
+      case 'end':
+        this.avatar.style.display = 'none';
+        var color = e.target.style.backgroundColor;
+        // Polymer gestures provides this convenient .hover() method
+        var dropTarget = e.detail.hover().parentNode;
+        if (color && dropTarget.classList[0] === 'sS') {
+          this.dropAvatar(color, dropTarget);
+        }
+        break;
+    }
+  },
+
+  //the color is updates as well as the array of Synth notes
+  dropAvatar: function(color, dropTarget) {
+    var id_name=dropTarget.id;
+    var spot=div_array.indexOf(id_name);
+    dropTarget.style.background = color;
+    Synth.synth_array[spot]=color_array.indexOf(color);
+  },
+
+  //this function handles the dot inside the XY-grid on the "mod" page
+  getDotPosition: function(e) {
+  	e.preventDefault();
+    var parentPosition = this.getPosition(e.target);
+    
+    var xPosition = e.detail.x - parentPosition.x;
+    var yPosition = e.detail.y - parentPosition.y;
+    xPosition = Math.max(Math.min(xPosition,this.xywidth),0);
+    yPosition = Math.max(Math.min(yPosition,this.xyheight),0);
+    
+    this.x_val=(xPosition-this.xywidth)*(100/this.xywidth)+100;     
+    this.y_val=(this.xyheight-yPosition)*(100/this.xyheight);   
+    
+    //set position
+    switch(e.type) {
+      case 'up':
+      this.$.dot.style.transition='left .2s ease-in, top .2s ease-in';
+      break;
+      case 'track':
+      this.$.dot.style.transition='left 0s ease-in, top 0s ease-in';
+      break;
+    }
+    //left and top are used here, because translate is seperately used to animate effects
+    this.$.dot.style.left = (xPosition-12) + "px";
+    this.$.dot.style.top = (yPosition-10) + "px";
+
+    // on the lfo SVG, we have the attribute binding style$="{{lfo_style}}" so it is easily changed here
+    this.lfo_style="width:"+xPosition+"px;height:"+yPosition+"px;margin-top:"+(this.xyheight-yPosition)+"px;";
+
+    //and finally the audio is updated
+    onUpdateModFrequency( 102-this.x_val )
+    onUpdateFilterMod( y_val*2 )
+  },
+
+  getPosition: function(element) {
+    var xPosition = 0;
+    var yPosition = 0;
+    while (element) {
+        xPosition += (element.offsetLeft - element.scrollLeft + element.clientLeft);
+        yPosition += (element.offsetTop - element.scrollTop + element.clientTop);
+        element = element.offsetParent;
+    }
+    return { x: xPosition, y: yPosition };
+  },
+
+  //ready function is called when element loads
+  ready: function() {
+  	//add the drag-and-drop avatar
+    var avatar = document.createElement('drag-avatar');
+    Polymer.dom(this).appendChild(avatar);
+    this.avatar = avatar;
+
+    //initialize some variables
+    this.lfo_style="width:0px;height:0px;margin-top:0px;";
+    this.x_val=0;
+    this.y_val=0;
+  },
+
+</script>
+
+</dom-module>
