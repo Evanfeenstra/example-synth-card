@@ -1,12 +1,12 @@
 <h2>Go to <a href="http://www.beatpush.com">BeatPush.com</a> to see this code in action. Click the "Synth" tab at the top of the page.</h2>
 
-The cool animations on page selection are implemented without writing any javascript at all...All you have to do is bind the "selected" attribute of neon-animated-pages to the "selected" attribute of paper-tabs, and specify some animations eg. entry-animation="fade-in-animation" exit-animation="scale-down-animation"
+The cool animations on page selection are implemented without writing any javascript at all...Just bind the "selected" attribute of neon-animated-pages to the "selected" attribute of paper-tabs, and specify some animations eg. entry-animation="fade-in-animation" exit-animation="scale-down-animation"
 
 <h3>"Note" section</h3>
 Here, you can drag and drop colors onto the outer circles, to sequence notes and play a melody. Check out the "handleTrack" function to see how that it done.
 
 <h3>"FX" section</h3>
-Paper-slider elements control different effect levels. The values of these sliders are bound to declared properties of the synth-card element, which makes it really easy to update them. For instance, if the filter slider needs to be changed from some non-UI source (a MongoDB document for instance), you can just call
+Paper-slider elements control different effect levels. The values of these sliders are bound to declared properties of the synth-card element, which makes it really easy to update them. If the filter slider needs to be changed from some non-UI source (a MongoDB document for instance), you can just call
 ```javascript
 document.getElementById('synth-card').filter_setting=value;
 ```
