@@ -107,7 +107,7 @@ Polymer({
 
   //the xyheight and xywidth variables must be reset in case the screen was rotated or resized. This assures that getDotPosition is always scaled correctly.
   page_selectedChanged: function() {
-  	if (this.page_selected==2) {
+    if (this.page_selected==2) {
       this.xyheight=this.$.xybounder.clientHeight;
       this.xywidth=this.$.xybounder.clientWidth;
     }
@@ -115,15 +115,15 @@ Polymer({
 
   //updating the waveform which controls the mod
   mode_selectedChanged: function() {
-  	this.$.lfopolyline.setAttribute("points",lfo_polyline_array[this.mode_selected]);
-  	var waveform=Math.floor(this.mode_selected/2);
+    this.$.lfopolyline.setAttribute("points",lfo_polyline_array[this.mode_selected]);
+    var waveform=Math.floor(this.mode_selected/2);
     onUpdateModWaveform( oscwaves[waveform] );
   },
 
   //some audio math to update filter cutoff
   filter_settingChanged: function() {
-	var numberOfOctaves = Math.log( 22050 / 40 ) / Math.LN2;
-	var multiplier = Math.pow(2, numberOfOctaves * (this.filter_setting/100.0 - 1.0));
+    var numberOfOctaves = Math.log( 22050 / 40 ) / Math.LN2;
+    var multiplier = Math.pow(2, numberOfOctaves * (this.filter_setting/100.0 - 1.0));
     onUpdateFilterCutoff(this.filter_setting);
   },
 
@@ -162,7 +162,7 @@ Polymer({
 
   //this function handles the dot inside the XY-grid on the "mod" page
   getDotPosition: function(e) {
-  	e.preventDefault();
+    e.preventDefault();
     var parentPosition = this.getPosition(e.target);
     
     var xPosition = e.detail.x - parentPosition.x;
@@ -207,7 +207,7 @@ Polymer({
 
   //ready function is called when element loads
   ready: function() {
-  	//add the drag-and-drop avatar
+    //add the drag-and-drop avatar
     var avatar = document.createElement('drag-avatar');
     Polymer.dom(this).appendChild(avatar);
     this.avatar = avatar;
