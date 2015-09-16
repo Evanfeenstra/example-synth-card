@@ -1,6 +1,6 @@
 <h3>Go to <a href="http://www.beatpush.com" target="_blank">BeatPush.com</a> to see this code in action. Click the "Synth" tab at the top of the page.</h3>
 
-This is is not the entire code for the <synth-card> element, I removed pieces to make it easier to survey.
+This is is not the entire code for the "synth-card" element, I removed pieces to make it easier to survey.
 
 <h4>"Note" section</h4>
 Here, you can drag and drop colors onto the outer circles, to sequence notes and play a melody. Check out the "handleTrack" function to see how that it done.
