@@ -10,7 +10,7 @@ Paper-slider elements control different effect levels. The values of these slide
 ```javascript
 document.getElementById('synth-card').filter_setting=value;
 ```
-The UI is updated because it is bound to this value, and the actual musical parameters are updated via the filter_settingChanged function.
+The UI is updated because it is bound to this value, and the actual musical parameters are updated via the filter_settingChanged function on line 124.
 
 <h4>"Mod" section</h4>
 You can use the XY-pad to control two parameters of the synth sound. As you drag the dot around the screen, the synthesizer "wobble" is updated, as well as the CSS of the SVG element. This is accomplished with the attribute binding on line 48 style$="{{lfo_style}}"
